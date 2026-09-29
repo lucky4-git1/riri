@@ -1,0 +1,17 @@
+# Ignore all model files (large binary files)
+*.onnx
+*.onnx_data
+*.onnx.data
+
+# Keep manifest and documentation
+!manifest.json
+!README.md
+!.gitignore
+
+# Ignore tokenizer files
+tokenizer/
+
+# Ignore quantized models
+*_quantized.onnx
+*_int8.onnx
+*_fp16.onnx

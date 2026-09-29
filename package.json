@@ -1,0 +1,48 @@
+{
+  "name": "riri",
+  "version": "0.1.0",
+  "description": "Local-first intelligent writing transformation engine with quantized Laya decision engine",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean",
+    "model:download": "node scripts/download-laya.js",
+    "model:verify": "node scripts/verify-laya.js",
+    "model:quantize": "python scripts/quantize-laya.py",
+    "model:benchmark": "node scripts/benchmark-laya.js",
+    "benchmark": "pnpm --filter @riri/benchmark start",
+    "benchmark:laya": "node scripts/benchmark-laya.js",
+    "benchmark:rewrite": "pnpm --filter @riri/benchmark rewrite",
+    "playground": "pnpm --filter @riri/playground dev",
+    "doctor": "node scripts/doctor.js",
+    "cli": "node packages/core/dist/cli.js"
+  },
+  "keywords": [
+    "writing",
+    "paraphrasing",
+    "local-first",
+    "cpu-inference",
+    "onnx",
+    "laya",
+    "nlp",
+    "text-transformation"
+  ],
+  "author": "Riri Project",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.8"
+  }
+}
