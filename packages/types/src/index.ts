@@ -27,7 +27,9 @@ export type ProtectedContentType =
   | 'proper_noun'
   | 'technical_identifier'
   | 'version'
-  | 'quoted';
+  | 'quoted'
+  | 'negation'
+  | 'freeze';
 
 export interface ProtectedSpan extends TextSpan {
   type: ProtectedContentType;
@@ -141,7 +143,8 @@ export type WritingMode =
   | 'professional'
   | 'formal'
   | 'simple'
-  | 'concise';
+  | 'concise'
+  | 'creative';
 
 export interface TransformationContext {
   mode: WritingMode;
@@ -257,22 +260,30 @@ export interface ScoringContext {
 // Rewrite Engine
 // =============================================================================
 
+export type GeneratorKind = 'auto' | 'deterministic' | 'local-neural' | 'hybrid';
+
 export interface RewriteOptions {
   mode?: WritingMode;
   aggressiveness?: number; // 0-1, default 0.3
+  intensity?: RewriteIntensity; // 0-4 rewrite depth ladder
   maxTransformations?: number; // default 6
   maxCandidates?: number; // default 5
   maxRetries?: number; // default 2
   timeout?: number; // milliseconds
   preserveFormatting?: boolean;
   decisionEngine?: 'laya' | 'heuristic';
+  generator?: GeneratorKind;
+  quality?: 'fast' | 'balanced' | 'thorough';
+  seed?: number;
 }
 
 export interface RewriteResult {
   text: string;
   original: string;
   metrics: QualityMetrics;
+  advancedMetrics?: AdvancedQualityMetrics;
   transformations: AppliedTransformation[];
+  changes?: ChangeRecord[];
   warnings: string[];
   metadata: RewriteMetadata;
 }
@@ -287,12 +298,25 @@ export interface AppliedTransformation {
 export interface RewriteMetadata {
   mode: WritingMode;
   aggressiveness: number;
-  decisionEngine: string;
+  decisionEngine: string; // 'laya' | 'heuristic' | ...
   fallbackUsed: boolean;
   latencyMs: number;
   candidatesGenerated: number;
   transformationsAttempted: number;
   transformationsApplied: number;
+  // Neural-upgrade metadata (Phases 1/24/25)
+  engine?: 'laya' | 'heuristic';
+  generator?: GeneratorKind | string;
+  intensity?: RewriteIntensity;
+  layaInferenceMs?: number;
+  modelLoaded?: boolean;
+  modelVersion?: string;
+  candidatesRejected?: number;
+  candidatesValidated?: number;
+  finalStrategy?: string;
+  repairIterations?: number;
+  stageLatencies?: StageLatencies;
+  seeded?: boolean;
 }
 
 export interface Candidate {
@@ -300,6 +324,30 @@ export interface Candidate {
   quality: QualityMetrics;
   transformations: AppliedTransformation[];
   score: number; // Combined quality score
+  // Neural-upgrade fields (optional for backward compatibility)
+  strategy?: string;
+  advancedMetrics?: AdvancedQualityMetrics;
+  changes?: ChangeRecord[];
+  rejected?: boolean;
+  rejectionReason?: string;
+}
+
+export interface RewriteGenerationContext {
+  originalText: string;
+  sentences: SentenceSemantics[];
+  plan: RewritePlan;
+  protectedSpans: ProtectedSpan[];
+  semanticAnchors: SemanticAnchor[];
+  style: StyleVector;
+  intensity: RewriteIntensity;
+  mode: WritingMode;
+  seed?: number;
+}
+
+export interface RewriteGenerator {
+  readonly name: string;
+  isAvailable(): boolean;
+  generate(input: string, context: RewriteGenerationContext): Promise<Candidate[]>;
 }
 
 // =============================================================================
@@ -391,6 +439,190 @@ export interface BenchmarkSummary {
   minLatencyMs: number;
   maxLatencyMs: number;
   averageQuality?: number;
+}
+
+// =============================================================================
+// Semantic Representation (Phase 3)
+// =============================================================================
+
+export type ClauseRole = 'main' | 'subordinate' | 'relative' | 'coordinate';
+
+export interface ClauseInfo {
+  text: string;
+  start: number;
+  end: number;
+  role: ClauseRole;
+  conjunction?: string;
+}
+
+export interface PhraseInfo {
+  text: string;
+  start: number;
+  end: number;
+  head?: string;
+}
+
+export type TenseName =
+  | 'past'
+  | 'present'
+  | 'future'
+  | 'past-perfect'
+  | 'present-perfect'
+  | 'modal'
+  | 'unknown';
+
+export interface EntityMention {
+  text: string;
+  kind: 'proper-noun' | 'number' | 'date' | 'technical' | 'quantity';
+  start: number;
+  end: number;
+}
+
+export interface SentenceSemantics {
+  index: number;
+  text: string;
+  start: number;
+  end: number;
+  clauses: ClauseInfo[];
+  subject: PhraseInfo | null;
+  predicate: PhraseInfo | null;
+  objects: PhraseInfo[];
+  verbPhrase: PhraseInfo | null;
+  negationCount: number;
+  negationSpans: TextSpan[];
+  tense: TenseName;
+  voice: 'active' | 'passive' | 'unknown';
+  modals: string[];
+  entities: EntityMention[];
+  contentWords: string[];
+  discourseConnector: string | null;
+  wordCount: number;
+}
+
+export interface SemanticAnalysis {
+  sentences: SentenceSemantics[];
+}
+
+export type SemanticAnchorKind =
+  | 'entity'
+  | 'number'
+  | 'date'
+  | 'technical'
+  | 'action'
+  | 'negation'
+  | 'other';
+
+export interface SemanticAnchor {
+  text: string;
+  kind: SemanticAnchorKind;
+  sentenceIndex: number;
+  start: number;
+  end: number;
+}
+
+// =============================================================================
+// Rewrite Plan (Phase 2)
+// =============================================================================
+
+export type RewriteOperationType =
+  | 'lexical-substitution'
+  | 'phrase-compression'
+  | 'syntactic-restructure'
+  | 'clause-reorder'
+  | 'voice-change'
+  | 'predicate-restructure'
+  | 'sentence-split'
+  | 'sentence-merge'
+  | 'connector-variation'
+  | 'redundancy-removal'
+  | 'formality-adjust'
+  | 'simplification'
+  | 'neural-generation';
+
+export interface RewriteOperation {
+  type: RewriteOperationType;
+  targetSentence: number;
+  targetSpan?: TextSpan;
+  strength: number; // 0-1
+  confidence: number; // 0-1
+  source: 'laya' | 'heuristic';
+  reason?: string;
+}
+
+export interface StyleVector {
+  mode: WritingMode;
+  formality: number; // 0-1 target
+  fluency: number;
+  concision: number;
+  simplicity: number;
+}
+
+export type RewriteIntensity = 0 | 1 | 2 | 3 | 4;
+
+export interface SentencePlanEntry {
+  index: number;
+  text: string;
+  change: number; // 0-1 how much this sentence should change
+}
+
+export interface RewritePlan {
+  sentences: SentencePlanEntry[];
+  protectedSpans: ProtectedSpan[];
+  semanticAnchors: SemanticAnchor[];
+  operations: RewriteOperation[];
+  preserve: string[];
+  style: StyleVector;
+  intensity: RewriteIntensity;
+  engine: 'laya' | 'heuristic';
+  reasoning?: string;
+}
+
+// =============================================================================
+// Change Intelligence (Phase 16)
+// =============================================================================
+
+export type ChangeCategory = 'word' | 'phrase' | 'structural' | 'sentence';
+
+export interface ChangeRecord {
+  type: ChangeCategory;
+  operation: string;
+  original: string;
+  replacement: string;
+  sentenceIndex: number;
+  confidence: number;
+  reason?: string;
+  strategy?: string;
+}
+
+// =============================================================================
+// Advanced Quality Metrics (Phase 11)
+// =============================================================================
+
+export interface AdvancedQualityMetrics {
+  semantic: number;
+  grammar: number;
+  naturalness: number;
+  styleAlignment: number;
+  lexicalDiversity: number;
+  structuralDiversity: number;
+  readability: number;
+  repetitionReduction: number;
+  informationPreservation: number;
+  protectedContent: number;
+  hallucinationRisk: number; // 0 = safe, 1 = invented facts present
+  usefulness: number;
+  overall: number;
+}
+
+export interface StageLatencies {
+  parse?: number;
+  analysis?: number;
+  laya?: number;
+  generation?: number;
+  validation?: number;
+  scoring?: number;
+  repair?: number;
+  total: number;
 }
 
 // =============================================================================

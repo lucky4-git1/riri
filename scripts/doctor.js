@@ -11,6 +11,7 @@ import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
@@ -185,15 +186,15 @@ async function checkPackages() {
 async function checkSystem() {
   log('\n💻 System Information', 'bright');
   
-  const os = process.platform;
+  const platform = process.platform;
   const arch = process.arch;
-  check('Operating System', true, `${os} ${arch}`);
+  check('Operating System', true, `${platform} ${arch}`);
   
-  const cpus = process.cpuCount || 'unknown';
-  check('CPU Cores', true, cpus);
+  const cpus = os.cpus()?.length || 'unknown';
+  check('CPU Cores', true, `${cpus}`);
   
-  const totalMem = Math.round(require('os').totalmem() / 1024 / 1024 / 1024);
-  const freeMem = Math.round(require('os').freemem() / 1024 / 1024 / 1024);
+  const totalMem = Math.round(os.totalmem() / 1024 / 1024 / 1024);
+  const freeMem = Math.round(os.freemem() / 1024 / 1024 / 1024);
   check('Memory', true, `${totalMem} GB total, ${freeMem} GB free`);
   
   return true;

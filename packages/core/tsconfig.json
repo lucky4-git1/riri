@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"],
+  "references": [
+    { "path": "../types" },
+    { "path": "../parser" },
+    { "path": "../analyzer" },
+    { "path": "../decision-engine" },
+    { "path": "../laya-adapter" },
+    { "path": "../transformations" },
+    { "path": "../validator" },
+    { "path": "../scoring" }
+  ]
+}

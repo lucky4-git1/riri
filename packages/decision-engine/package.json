@@ -1,7 +1,7 @@
 {
-  "name": "@riri/laya-adapter",
+  "name": "@riri/decision-engine",
   "version": "0.1.0",
-  "description": "Laya decision engine adapter for Riri",
+  "description": "Decision engine for planning writing transformations in Riri",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,14 +18,11 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "keywords": ["riri", "laya", "decision-engine"],
+  "keywords": ["riri", "decision-engine", "nlp", "planning"],
   "author": "Riri Project",
   "license": "MIT",
   "dependencies": {
-    "@riri/types": "workspace:*",
-    "@riri/model-runtime": "workspace:*",
-    "@receptron/laya": "^0.1.2",
-    "zod": "^3.24.1"
+    "@riri/types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

@@ -1,0 +1,97 @@
+[
+  {
+    "id": "simple-001",
+    "category": "simple",
+    "input": "The cat sat on the mat.",
+    "expectedFeatures": {
+      "sentenceCount": 1,
+      "hasNumbers": false,
+      "hasUrls": false
+    }
+  },
+  {
+    "id": "numbers-001",
+    "category": "numbers",
+    "input": "The system processes 100 requests per minute with 99.9% uptime.",
+    "expectedFeatures": {
+      "hasNumbers": true,
+      "protectedEntityCount": 2
+    },
+    "protectedContent": ["100", "99.9%"]
+  },
+  {
+    "id": "url-001",
+    "category": "urls",
+    "input": "Visit https://example.com for more information.",
+    "expectedFeatures": {
+      "hasUrls": true
+    },
+    "protectedContent": ["https://example.com"]
+  },
+  {
+    "id": "negation-001",
+    "category": "negation",
+    "input": "The system does not support authentication.",
+    "protectedContent": ["not"],
+    "mustPreserve": "negation"
+  },
+  {
+    "id": "technical-001",
+    "category": "technical",
+    "input": "The API returns JSON data with OAuth2 authentication using JWT tokens.",
+    "expectedFeatures": {
+      "technicalTermRatio": 0.3
+    },
+    "protectedContent": ["API", "JSON", "OAuth2", "JWT"]
+  },
+  {
+    "id": "complex-001",
+    "category": "complex",
+    "input": "Although the system is designed to handle high throughput, performance degrades when the database reaches 80% capacity, which typically occurs during peak hours between 9am and 5pm when user activity increases by approximately 300%.",
+    "expectedFeatures": {
+      "complexity": 0.7,
+      "averageSentenceLength": 35
+    },
+    "protectedContent": ["80%", "9am", "5pm", "300%"]
+  },
+  {
+    "id": "passive-001",
+    "category": "passive-voice",
+    "input": "The report was written by the team and reviewed by management.",
+    "expectedFeatures": {
+      "passiveVoiceRatio": 1.0
+    }
+  },
+  {
+    "id": "email-001",
+    "category": "email",
+    "input": "Contact support@example.com for assistance.",
+    "protectedContent": ["support@example.com"]
+  },
+  {
+    "id": "code-001",
+    "category": "code",
+    "input": "Use the `getUserData()` function to fetch user information.",
+    "expectedFeatures": {
+      "hasCode": true
+    },
+    "protectedContent": ["`getUserData()`"]
+  },
+  {
+    "id": "mixed-001",
+    "category": "mixed",
+    "input": "The API at https://api.example.com processes 1000 requests/second with 99.99% reliability, handling user@example.com notifications via `sendEmail()` function.",
+    "expectedFeatures": {
+      "hasNumbers": true,
+      "hasUrls": true,
+      "hasCode": true
+    },
+    "protectedContent": [
+      "https://api.example.com",
+      "1000",
+      "99.99%",
+      "user@example.com",
+      "`sendEmail()`"
+    ]
+  }
+]

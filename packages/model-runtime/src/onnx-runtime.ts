@@ -6,14 +6,13 @@
  */
 
 import * as ort from 'onnxruntime-node';
-import { readFile, stat } from 'node:fs/promises';
+import { stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import type {
   ModelRuntime,
   ModelConfig,
   ModelMetadata,
   HealthStatus,
-  ModelError,
 } from '@riri/types';
 
 export interface ONNXRuntimeOptions {
@@ -148,37 +147,6 @@ export class ONNXRuntime implements ModelRuntime {
       throw this.createError('Model not loaded', 'MODEL_NOT_LOADED');
     }
     return this._metadata;
-  }
-
-  /**
-   * Get input metadata
-   */
-  getInputs(): ReadonlyArray<ort.InferenceSession.ValueMetadata> {
-    if (!this.session) {
-      throw this.createError('Model not loaded', 'MODEL_NOT_LOADED');
-    }
-    return this.session.inputNames.map(name => {
-      const meta = (this.session as any).inputNames.indexOf(name);
-      return {
-        name,
-        dims: [],
-        type: 'tensor',
-      };
-    });
-  }
-
-  /**
-   * Get output metadata
-   */
-  getOutputs(): ReadonlyArray<ort.InferenceSession.ValueMetadata> {
-    if (!this.session) {
-      throw this.createError('Model not loaded', 'MODEL_NOT_LOADED');
-    }
-    return this.session.outputNames.map(name => ({
-      name,
-      dims: [],
-      type: 'tensor' as const,
-    }));
   }
 
   /**

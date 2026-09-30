@@ -1,0 +1,14 @@
+{
+  "name": "@riri/playground",
+  "version": "0.1.0",
+  "description": "Interactive local web testing harness and playground for the Riri writing intelligence engine",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@riri/core": "workspace:*"
+  }
+}

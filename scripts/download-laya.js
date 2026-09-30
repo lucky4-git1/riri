@@ -24,7 +24,7 @@ const MODELS_DIR = join(PROJECT_ROOT, 'models', 'laya');
 // Hugging Face configuration
 const HF_REPO = 'receptron/laya-onnx';
 const HF_REVISION = 'main'; // Can be pinned to specific commit
-const HF_SUBFOLDER = 'multilingual'; // or 'english' for English-only
+const HF_SUBFOLDER = ''; // Files live at the repository root
 
 // Files to download
 const REQUIRED_FILES = [
@@ -178,7 +178,9 @@ async function downloadModel() {
       continue;
     }
 
-    const url = `${HF_BASE_URL}/${HF_SUBFOLDER}/${file}`;
+    const url = HF_SUBFOLDER
+      ? `${HF_BASE_URL}/${HF_SUBFOLDER}/${file}`
+      : `${HF_BASE_URL}/${file}`;
     
     log(`📥 Downloading ${file}...`, 'cyan');
     

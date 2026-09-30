@@ -11,6 +11,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
+    "test:parser": "node scripts/test-parser.js",
     "lint": "pnpm -r lint",
     "clean": "pnpm -r clean",
     "model:download": "node scripts/download-laya.js",
